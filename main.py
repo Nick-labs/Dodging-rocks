@@ -2,58 +2,21 @@ import pygame
 import random
 import os
 import sys
+import credits
 
 WIDTH, HEIGHT = 800, 600
 FPS = 60
 
-FLOOR = HEIGHT * 8 // 10
-ROCK_SIZE = (100, 100)
+FLOOR = HEIGHT * 0.85
+# ROCK_SIZE = (100, 100)
+ROCK_SIZE = (80, 80)
+PLAYER_SIZE = (40, 56)
 
 GRAVITY = 0.25
 PLAYER_SPEED = 6
-PLAYER_JUMP_FORCE = -8
+PLAYER_JUMP_FORCE = -10
 
-FALL_TIME = 1500  # задержка между камнями в миллисекундах
-
-
-class Rock(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('data/flax.png'), ROCK_SIZE)
-        self.orig_image = self.image.copy()
-
-        self.rect = self.image.get_rect()
-
-        self.rect.left = random.randint(0, WIDTH - self.rect.width)
-        self.rect.bottom = 0
-        self.radius = ROCK_SIZE[0] // 2
-
-        self.touches = 0
-
-        self.vx = random.randint(-5, 5)
-        self.vy = 0
-
-    def update(self):
-
-        self.vy += GRAVITY
-        self.rect.x += self.vx
-        self.rect.y += self.vy
-
-        if pygame.sprite.collide_mask(self, player):
-            player.kill()
-            particle.kill()
-
-        if self.rect.left <= 0 or self.rect.right >= WIDTH:
-            self.vx = -self.vx
-
-        if self.touches < 2 and pygame.sprite.collide_rect(self, floor):
-            self.touches += 1
-            self.rect.bottom = floor.rect.top
-            self.vy = -self.vy * 0.6
-        if self.rect.top >= HEIGHT:
-            # print('kill')
-            # print(rocks_group)
-            self.kill()
+fall_time = 1500  # задержка между камнями в миллисекундах
 
 
 class Player(pygame.sprite.Sprite):
@@ -66,11 +29,11 @@ class Player(pygame.sprite.Sprite):
 
         for i in range(3):
             self.idle_images.append(pygame.transform.scale(
-                pygame.image.load(f'data/character/idle/adventurer-idle-0{i}.png'), (60, 84)))
+                pygame.image.load(f'data/character/idle/adventurer-idle-0{i}.png'), PLAYER_SIZE))
 
         for i in range(6):
             self.run_right_images.append(
-                pygame.transform.scale(pygame.image.load(f'data/character/run/adventurer-run-0{i}.png'), (60, 84)))
+                pygame.transform.scale(pygame.image.load(f'data/character/run/adventurer-run-0{i}.png'), PLAYER_SIZE))
             self.run_left_images.append(pygame.transform.flip(self.run_right_images[i], True, False))
 
         self.image = self.idle_images[0]
@@ -129,7 +92,6 @@ class Player(pygame.sprite.Sprite):
             self.image = self.run_right_images[self.index // 10]
         else:
             self.image = self.idle_images[self.u]
-            print(self.rect.bottom)
 
         self.rect.x += self.vx
         self.rect.y += self.vy
@@ -145,10 +107,50 @@ class Player(pygame.sprite.Sprite):
             player.rect.left = 0
 
 
+class Rock(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.transform.scale(pygame.image.load('data/flax.png'), ROCK_SIZE)
+        self.orig_image = self.image.copy()
+
+        self.rect = self.image.get_rect()
+
+        self.rect.left = random.randint(0, WIDTH - self.rect.width)
+        self.rect.bottom = 0
+        self.radius = ROCK_SIZE[0] // 2
+
+        self.touches = 0
+
+        self.vx = random.randint(-4, 4)
+        self.vy = 0
+
+    def update(self):
+
+        self.vy += GRAVITY
+        self.rect.x += self.vx
+        self.rect.y += self.vy
+
+        if pygame.sprite.collide_mask(self, player):
+            player.kill()
+            particle.kill()
+
+        if self.rect.left <= 0 or self.rect.right >= WIDTH:
+            self.vx = -self.vx
+
+        if self.touches < 1 and pygame.sprite.collide_rect(self, floor):
+            self.touches += 1
+            self.rect.bottom = floor.rect.top
+            self.vy = -self.vy * 0.5
+        if self.rect.top >= HEIGHT:
+            # print('kill')
+            # print(rocks_group)
+            self.kill()
+
+
 class Floor(pygame.sprite.Sprite):
     def __init__(self, h):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((WIDTH, 20))
+        self.image = pygame.image.load('data/floor.png')
         self.rect = self.image.get_rect()
         self.rect.y = h
 
@@ -170,23 +172,6 @@ def load_image(name, colorkey=None):
     return image
 
 
-def intro():
-    smallfont = pygame.font.SysFont(None, 30)
-    intro = True
-    while intro:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-            elif event.type == pygame.KEYDOWN:
-                intro = False
-        screen.fill((255, 255, 255))
-        text = smallfont.render("press any key to continue", True, (0, 0, 0))
-        screen.blit(text, [320, 240])
-        pygame.display.update()
-        clock.tick(15)
-
-
 class Particle(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -205,6 +190,23 @@ class Particle(pygame.sprite.Sprite):
             self.image = self.image_to_left
 
 
+def intro():
+    smallfont = pygame.font.SysFont(None, 30)
+    intro = True
+    while intro:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.KEYDOWN:
+                intro = False
+        screen.fill((255, 255, 255))
+        text = smallfont.render("press any key to continue", True, (0, 0, 0))
+        screen.blit(text, [320, 240])
+        pygame.display.update()
+        clock.tick(15)
+
+
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -215,7 +217,7 @@ font = pygame.font.SysFont('arial', 40)
 
 intro()
 
-bg = pygame.transform.scale(pygame.image.load('data/bg.jpg'), (WIDTH, HEIGHT))
+bg = pygame.transform.scale(pygame.image.load('data/backgrounds/cave.jpg'), (WIDTH, HEIGHT))
 floor = pygame.image.load('data/floor.jpg')
 floor = pygame.transform.scale(floor, (WIDTH, floor.get_height()))
 
@@ -280,8 +282,22 @@ while running:
         player.rect.left = 0
 
     now = pygame.time.get_ticks()
+    if now < 5000:
+        fall_time = 99999
+    elif now < 10000:
+        fall_time = 1500
+    elif now < 15000:
+        fall_time = 1200
+    elif now < 20000:
+        fall_time = 1000
+    elif now < 25000:
+        fall_time = 900
+    elif now < 30000:
+        fall_time = 800
+    else:
+        fall_time = 700
 
-    if now - last_time >= FALL_TIME:
+    if now - last_time >= fall_time:
         rocks_group.add(Rock())
         last_time = now
 
@@ -312,8 +328,12 @@ while running:
     else:
         screen.blit(font.render(f'{time / 1000:06.1f}s', True, (0, 0, 0)), (5, HEIGHT - 48))
 
+    if not player_group:
+        credits.end_credits()
+
     pygame.display.flip()
-    # print(clock.get_fps())
+    print(clock.get_fps())
 
     clock.tick(FPS)
+
 pygame.quit()
