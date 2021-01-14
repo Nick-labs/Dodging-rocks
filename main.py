@@ -1,5 +1,7 @@
 import pygame
 import random
+import os
+import sys
 
 WIDTH, HEIGHT = 800, 600
 FPS = 60
@@ -19,6 +21,7 @@ class Rock(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(pygame.image.load('data/flax.png'), ROCK_SIZE)
         self.orig_image = self.image.copy()
+
         self.rect = self.image.get_rect()
 
         self.rect.left = random.randint(0, WIDTH - self.rect.width)
@@ -31,6 +34,7 @@ class Rock(pygame.sprite.Sprite):
         self.vy = 0
 
     def update(self):
+
         self.vy += GRAVITY
         self.rect.x += self.vx
         self.rect.y += self.vy
@@ -46,8 +50,8 @@ class Rock(pygame.sprite.Sprite):
             self.rect.bottom = floor.rect.top
             self.vy = -self.vy * 0.6
         if self.rect.top >= HEIGHT:
-            print('kill')
-            print(rocks_group)
+            # print('kill')
+            # print(rocks_group)
             self.kill()
 
 
@@ -71,12 +75,11 @@ class Player(pygame.sprite.Sprite):
             pass
 
         # Если уже на земле, то ставим позицию Y как 0
-        if self.rect.bottom <= floor.rect.top + self.vy:
+        if self.rect.bottom <= floor.rect.top:
             if pygame.sprite.collide_rect(self, floor) and self.vy >= 0:
                 self.vy = 0
                 self.rect.bottom = floor.rect.top
-        else:
-            pass
+
         if pygame.sprite.collide_rect(self, floor) and self.rect.bottom >= floor.rect.top and self.vy >= 0:
             self.vy = 0
             self.rect.bottom = floor.rect.top + 1
@@ -104,17 +107,6 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.calc_grav()
 
-        block_hit_list = pygame.sprite.spritecollide(self, floor_group, False)
-        # Перебираем все возможные объекты, с которыми могли бы столкнуться
-        for block in block_hit_list:
-            # Если мы идем направо,
-            # устанавливает нашу правую сторону на левой стороне предмета, которого мы ударили
-            if self.vx > 0:
-                self.rect.right = block.rect.left
-            elif self.vx < 0:
-                # В противном случае, если мы движемся влево, то делаем наоборот
-                self.rect.left = block.rect.right
-
         self.rect.x += self.vx
         self.rect.y += self.vy
 
@@ -135,6 +127,23 @@ class Floor(pygame.sprite.Sprite):
         self.image = pygame.Surface((WIDTH, 20))
         self.rect = self.image.get_rect()
         self.rect.y = h
+
+
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+
+    if colorkey is not None:
+        image = image.convert()
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    else:
+        image = image.convert_alpha()
+    return image
 
 
 def intro():
@@ -173,7 +182,6 @@ player_group = pygame.sprite.Group(player)
 rocks_group = pygame.sprite.Group()
 
 floor = Floor(FLOOR)
-floor.rect.x = -400
 floor_group = pygame.sprite.Group(floor)
 
 last_time = 0
@@ -256,7 +264,7 @@ while running:
 
     pygame.display.flip()
 
-    # print(clock.get_fps())
+    print(clock.get_fps())
     clock.tick(FPS)
 
 pygame.quit()
