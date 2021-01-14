@@ -179,8 +179,10 @@ player_group = pygame.sprite.Group(player)
 
 particle = Particle()
 particle_group = pygame.sprite.Group(particle)
+
 """flag для изменения спрайта(стороны)
 flag_movement для понятие двигаеться ли player или нет"""
+
 flag = True
 flag_movement = False
 
