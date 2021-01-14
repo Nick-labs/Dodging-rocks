@@ -1,7 +1,7 @@
 import pygame
 import random
 
-WIDTH, HEIGHT = 800, 800
+WIDTH, HEIGHT = 800, 600
 FPS = 60
 
 FLOOR = HEIGHT * 8 // 10
@@ -104,6 +104,66 @@ class Player(pygame.sprite.Sprite):
             player.rect.left = 0
 
 
+class Particle(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.right = True
+        self.image = pygame.transform.scale(pygame.image.load('data/particle.png'), (26, 26))
+        self.rect = self.image.get_rect()
+        self.step = 3
+        self.vx = 0
+        self.vy = 0
+
+    def calc_grav(self):
+        if self.vy == 0:
+            self.vy = 1
+        else:
+            self.vy += GRAVITY
+
+        # Если уже на земле, то ставим позицию Y как 0
+        if self.rect.bottom >= FLOOR and self.vy >= 0:
+            self.vy = 0
+            self.rect.bottom = FLOOR
+
+    def go_left(self):
+        self.vx = -PLAYER_SPEED
+
+        if self.right:  # Проверяем куда он смотрит
+            self.right = False
+
+    def go_right(self):
+        self.vx = PLAYER_SPEED
+
+        if not self.right:
+            self.right = True
+
+    def update(self, x, x1, f):
+        flag = f
+        self.calc_grav()
+        if flag:
+            self.rect.x = x[0] - 1
+            if self.right:
+                self.image = pygame.transform.scale(pygame.image.load('data/particle_r.png'), (26, 26))
+            else:
+                self.image = pygame.transform.scale(pygame.image.load('data/particle.png'), (26, 26))
+
+        else:
+            self.rect.x = x1[0] - 25
+            if self.right:
+                self.image = pygame.transform.scale(pygame.image.load('data/particle_r.png'), (26, 26))
+            else:
+                self.image = pygame.transform.scale(pygame.image.load('data/particle.png'), (26, 26))
+
+        self.rect.x += self.vx
+        self.rect.y += self.vy
+
+        if particle.rect.right > WIDTH:
+            particle.rect.right = WIDTH - 1
+
+        if particle.rect.left < 0:
+            particle.rect.left = 0
+
+
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -118,6 +178,14 @@ floor = pygame.transform.scale(floor, (WIDTH, floor.get_height()))
 
 player = Player()
 player_group = pygame.sprite.Group(player)
+
+particle = Particle()
+particle_group = pygame.sprite.Group(particle)
+"""flag для изменения спрайта(стороны)
+flag_movement для понятие двигаеться ли player или нет"""
+flag = True
+flag_movement = False
+
 rocks_group = pygame.sprite.Group()
 
 last_time = 0
@@ -132,25 +200,36 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 player.go_left()
+                flag_movement = True
+                particle.go_left()
+                flag = True
 
             if event.key == pygame.K_RIGHT:
                 player.go_right()
+                flag_movement = True
+                particle.go_right()
+                flag = False
 
             if event.key == pygame.K_UP:
                 player.jump()
+                flag_movement = False
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT and player.vx < 0:
                 player.stop()
+                flag_movement = False
 
             if event.key == pygame.K_RIGHT and player.vx > 0:
                 player.stop()
+                flag_movement = False
 
     if player.rect.right > WIDTH:
         player.rect.right = WIDTH
+        particle.rect.right = WIDTH
 
     if player.rect.left < 0:
         player.rect.left = 0
+        particle.rect.left = 0
 
     now = pygame.time.get_ticks()
 
@@ -161,11 +240,18 @@ while running:
     player_group.update()
     rocks_group.update()
 
+    """передает координаты чтобы следы были прямо за объектом player"""
+    particle_group.update(player.rect.bottomright, player.rect.bottomleft, flag)
+
     screen.fill((0, 0, 0))
     screen.blit(bg, (0, 0))
 
     player_group.draw(screen)
     rocks_group.draw(screen)
+
+    """Будет рисовать следы если только двтгаеться"""
+    if flag_movement:
+        particle_group.draw(screen)
 
     # screen.blit(bg, (0, FLOOR))
     screen.blit(floor, (0, FLOOR))
@@ -183,5 +269,4 @@ while running:
 
     # print(clock.get_fps())
     clock.tick(FPS)
-
 pygame.quit()
