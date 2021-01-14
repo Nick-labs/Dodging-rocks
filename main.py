@@ -83,7 +83,6 @@ class Player(pygame.sprite.Sprite):
         #     self.right = True
 
     def stop(self):
-        # self.image = pygame.image.load('images\\player_stop.png')
         self.vx = 0
 
     def jump(self):
@@ -105,61 +104,19 @@ class Player(pygame.sprite.Sprite):
 class Particle(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.right = True
-        self.image = pygame.transform.scale(pygame.image.load('data/particle.png'), (26, 26))
+        self.image_to_left = pygame.transform.scale(pygame.image.load('data/particle.png'), (26, 26))
+        self.image = self.image_to_left
+        self.image_to_right = pygame.transform.scale(pygame.image.load('data/particle_r.png'), (26, 26))
         self.rect = self.image.get_rect()
-        self.step = 3
-        self.vx = 0
-        self.vy = 0
 
-    def calc_grav(self):
-        if self.vy == 0:
-            self.vy = 1
+    def update(self):
+        self.rect.bottom = player.rect.bottom
+        if player.vx > 0:
+            self.rect.right = player.rect.left
+            self.image = self.image_to_right
         else:
-            self.vy += GRAVITY
-
-        # Если уже на земле, то ставим позицию Y как 0
-        if self.rect.bottom >= FLOOR and self.vy >= 0:
-            self.vy = 0
-            self.rect.bottom = FLOOR
-
-    def go_left(self):
-        self.vx = -PLAYER_SPEED
-
-        if self.right:  # Проверяем куда он смотрит
-            self.right = False
-
-    def go_right(self):
-        self.vx = PLAYER_SPEED
-
-        if not self.right:
-            self.right = True
-
-    def update(self, x, x1, f):
-        flag = f
-        self.calc_grav()
-        if flag:
-            self.rect.x = x[0] - 1
-            if self.right:
-                self.image = pygame.transform.scale(pygame.image.load('data/particle_r.png'), (26, 26))
-            else:
-                self.image = pygame.transform.scale(pygame.image.load('data/particle.png'), (26, 26))
-
-        else:
-            self.rect.x = x1[0] - 25
-            if self.right:
-                self.image = pygame.transform.scale(pygame.image.load('data/particle_r.png'), (26, 26))
-            else:
-                self.image = pygame.transform.scale(pygame.image.load('data/particle.png'), (26, 26))
-
-        self.rect.x += self.vx
-        self.rect.y += self.vy
-
-        if particle.rect.right > WIDTH:
-            particle.rect.right = WIDTH - 1
-
-        if particle.rect.left < 0:
-            particle.rect.left = 0
+            self.rect.left = player.rect.right
+            self.image = self.image_to_left
 
 
 pygame.init()
@@ -180,12 +137,6 @@ player_group = pygame.sprite.Group(player)
 particle = Particle()
 particle_group = pygame.sprite.Group(particle)
 
-"""flag для изменения спрайта(стороны)
-flag_movement для понятие двигаеться ли player или нет"""
-
-flag = True
-flag_movement = False
-
 rocks_group = pygame.sprite.Group()
 
 last_time = 0
@@ -200,36 +151,25 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 player.go_left()
-                flag_movement = True
-                particle.go_left()
-                flag = True
 
             if event.key == pygame.K_RIGHT:
                 player.go_right()
-                flag_movement = True
-                particle.go_right()
-                flag = False
 
             if event.key == pygame.K_UP:
                 player.jump()
-                flag_movement = True
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT and player.vx < 0:
                 player.stop()
-                flag_movement = False
 
             if event.key == pygame.K_RIGHT and player.vx > 0:
                 player.stop()
-                flag_movement = False
 
     if player.rect.right > WIDTH:
         player.rect.right = WIDTH
-        particle.rect.right = WIDTH
 
     if player.rect.left < 0:
         player.rect.left = 0
-        particle.rect.left = 0
 
     now = pygame.time.get_ticks()
 
@@ -240,19 +180,14 @@ while running:
     player_group.update()
     # rocks_group.update()
 
-    """передает координаты чтобы следы были прямо за объектом player"""
-    particle_group.update(player.rect.bottomright, player.rect.bottomleft, flag)
-
     screen.fill((0, 0, 0))
     screen.blit(bg, (0, 0))
 
     player_group.draw(screen)
     rocks_group.draw(screen)
 
-    """Будет рисовать следы если только двтгаеться"""
-    if not flag_movement or player.rect.bottom < 480:
-        pass
-    else:
+    if player.vx and player.rect.bottom >= FLOOR:
+        particle_group.update()
         particle_group.draw(screen)
 
     # screen.blit(bg, (0, FLOOR))
