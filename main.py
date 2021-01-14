@@ -1,7 +1,7 @@
 import pygame
 import random
 
-WIDTH, HEIGHT = 800, 800
+WIDTH, HEIGHT = 800, 600
 FPS = 60
 
 FLOOR = HEIGHT * 8 // 10
@@ -23,6 +23,7 @@ class Rock(pygame.sprite.Sprite):
 
         self.rect.left = random.randint(0, WIDTH - self.rect.width)
         self.rect.bottom = 0
+        self.radius = ROCK_SIZE[0] // 2
 
         self.touches = 0
 
@@ -44,9 +45,9 @@ class Rock(pygame.sprite.Sprite):
             self.vx = -self.vx
 
         if self.touches < 2:
-            if self.rect.bottom >= FLOOR:
+            if pygame.sprite.collide_rect(self, floor):
                 self.touches += 1
-                self.rect.bottom = FLOOR
+                self.rect.bottom = floor.rect.top
                 self.vy = -self.vy * 0.6
         elif self.rect.top >= HEIGHT:
             self.kill()
@@ -60,6 +61,7 @@ class Player(pygame.sprite.Sprite):
         self.step = 3
         self.vx = 0
         self.vy = 0
+        self.radius = self.rect.height
 
     def calc_grav(self):
         if self.vy == 0:
@@ -68,9 +70,15 @@ class Player(pygame.sprite.Sprite):
             self.vy += GRAVITY
 
         # Если уже на земле, то ставим позицию Y как 0
-        if self.rect.bottom >= FLOOR and self.vy >= 0:
+        # if pygame.sprite.collide_rect(self, floor) and self.vy >= 0:
+        #     self.vy = 0
+        #     self.rect.bottom = floor.rect.top
+
+        if pygame.sprite.collide_rect(self, floor) and self.rect.bottom >= floor.rect.top and self.vy >= 0:
             self.vy = 0
-            self.rect.bottom = FLOOR
+            self.rect.bottom = floor.rect.top + 1
+        else:
+            self.vy += GRAVITY
 
     def go_left(self):
         self.vx = -PLAYER_SPEED
@@ -94,14 +102,55 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         self.calc_grav()
+
+        block_hit_list = pygame.sprite.spritecollide(self, floor_group, False)
+        # Перебираем все возможные объекты, с которыми могли бы столкнуться
+        for block in block_hit_list:
+            # Если мы идем направо,
+            # устанавливает нашу правую сторону на левой стороне предмета, которого мы ударили
+            if self.vx > 0:
+                self.rect.right = block.rect.left
+            elif self.vx < 0:
+                # В противном случае, если мы движемся влево, то делаем наоборот
+                self.rect.left = block.rect.right
+
         self.rect.x += self.vx
         self.rect.y += self.vy
+
+        if self.rect.y > HEIGHT:
+            self.rect.x = 100
+            self.rect.y = 100
 
         if player.rect.right > WIDTH:
             player.rect.right = WIDTH
 
         if player.rect.left < 0:
             player.rect.left = 0
+
+
+class Floor(pygame.sprite.Sprite):
+    def __init__(self, h):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((WIDTH, 20))
+        self.rect = self.image.get_rect()
+        self.rect.y = h
+
+
+def intro():
+    smallfont = pygame.font.SysFont(None, 30)
+    intro = True
+    while intro:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.KEYDOWN:
+                intro = False
+        screen.fill((255, 255, 255))
+        text = smallfont.render("press any key to continue", True, (0, 0, 0))
+        screen.blit(text, [320, 240])
+        pygame.display.update()
+        clock.tick(15)
 
 
 pygame.init()
@@ -112,13 +161,19 @@ pygame.display.set_caption('Dodging rocks')
 clock = pygame.time.Clock()
 font = pygame.font.SysFont('arial', 40)
 
-bg = pygame.transform.scale(pygame.image.load('data/bg.jpg'), (WIDTH, FLOOR))
+intro()
+
+bg = pygame.transform.scale(pygame.image.load('data/bg.jpg'), (WIDTH, HEIGHT))
 floor = pygame.image.load('data/floor.jpg')
 floor = pygame.transform.scale(floor, (WIDTH, floor.get_height()))
 
 player = Player()
 player_group = pygame.sprite.Group(player)
 rocks_group = pygame.sprite.Group()
+
+floor = Floor(FLOOR)
+floor.rect.x = -400
+floor_group = pygame.sprite.Group(floor)
 
 last_time = 0
 time = 0
@@ -138,6 +193,22 @@ while running:
 
             if event.key == pygame.K_UP:
                 player.jump()
+
+            if event.key == pygame.K_1:
+                floor.rect.bottom = HEIGHT // 2
+                # WIDTH, HEIGHT = 800, 600
+                # FLOOR = HEIGHT * 8 // 10
+                # floor.rect.y = FLOOR
+                # ROCK_SIZE = (100, 100)
+                # screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+            if event.key == pygame.K_2:
+                floor.rect.bottom = HEIGHT * 8 // 10
+                # WIDTH, HEIGHT = 400, 400
+                # FLOOR = HEIGHT * 8 // 10
+                # floor.rect.y = FLOOR
+                # ROCK_SIZE = (50, 50)
+                # screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT and player.vx < 0:
@@ -160,15 +231,17 @@ while running:
 
     player_group.update()
     rocks_group.update()
+    floor_group.update()
 
     screen.fill((0, 0, 0))
     screen.blit(bg, (0, 0))
 
     player_group.draw(screen)
     rocks_group.draw(screen)
+    floor_group.draw(screen)
 
     # screen.blit(bg, (0, FLOOR))
-    screen.blit(floor, (0, FLOOR))
+    # screen.blit(floor, (0, FLOOR))
 
     pygame.draw.rect(screen, (255, 255, 255), (0, HEIGHT - 50, 125, HEIGHT))
 
@@ -181,7 +254,7 @@ while running:
 
     pygame.display.flip()
 
-    # print(clock.get_fps())
+    print(clock.get_fps())
     clock.tick(FPS)
 
 pygame.quit()
