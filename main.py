@@ -41,6 +41,7 @@ class Rock(pygame.sprite.Sprite):
 
         if pygame.sprite.collide_mask(self, player):
             player.kill()
+            particle.kill()
 
         if self.rect.left <= 0 or self.rect.right >= WIDTH:
             self.vx = -self.vx
@@ -97,7 +98,6 @@ class Player(pygame.sprite.Sprite):
         #     self.right = True
 
     def stop(self):
-        # self.image = pygame.image.load('images\\player_stop.png')
         self.vx = 0
 
     def jump(self):
@@ -163,6 +163,24 @@ def intro():
         clock.tick(15)
 
 
+class Particle(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image_to_left = pygame.transform.scale(pygame.image.load('data/particle.png'), (26, 26))
+        self.image = self.image_to_left
+        self.image_to_right = pygame.transform.scale(pygame.image.load('data/particle_r.png'), (26, 26))
+        self.rect = self.image.get_rect()
+
+    def update(self):
+        self.rect.bottom = player.rect.bottom
+        if player.vx > 0:
+            self.rect.right = player.rect.left
+            self.image = self.image_to_right
+        else:
+            self.rect.left = player.rect.right
+            self.image = self.image_to_left
+
+
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -179,6 +197,10 @@ floor = pygame.transform.scale(floor, (WIDTH, floor.get_height()))
 
 player = Player()
 player_group = pygame.sprite.Group(player)
+
+particle = Particle()
+particle_group = pygame.sprite.Group(particle)
+
 rocks_group = pygame.sprite.Group()
 
 floor = Floor(FLOOR)
@@ -240,7 +262,7 @@ while running:
         last_time = now
 
     player_group.update()
-    rocks_group.update()
+    # rocks_group.update()
     floor_group.update()
 
     screen.fill((0, 0, 0))
@@ -249,6 +271,10 @@ while running:
     player_group.draw(screen)
     rocks_group.draw(screen)
     floor_group.draw(screen)
+
+    if player.vx and player.rect.bottom >= floor.rect.top:
+        particle_group.update()
+        particle_group.draw(screen)
 
     # screen.blit(bg, (0, FLOOR))
     # screen.blit(floor, (0, FLOOR))
@@ -263,8 +289,7 @@ while running:
         screen.blit(font.render(f'{time / 1000:06.1f}s', True, (0, 0, 0)), (5, HEIGHT - 48))
 
     pygame.display.flip()
+    # print(clock.get_fps())
 
-    print(clock.get_fps())
     clock.tick(FPS)
-
 pygame.quit()
