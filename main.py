@@ -70,15 +70,13 @@ class Player(pygame.sprite.Sprite):
             self.vy += GRAVITY
 
         # Если уже на земле, то ставим позицию Y как 0
-        # if pygame.sprite.collide_rect(self, floor) and self.vy >= 0:
-        #     self.vy = 0
-        #     self.rect.bottom = floor.rect.top
-
-        if pygame.sprite.collide_rect(self, floor) and self.rect.bottom >= floor.rect.top and self.vy >= 0:
+        if pygame.sprite.collide_rect(self, floor) and self.vy >= 0:
             self.vy = 0
-            self.rect.bottom = floor.rect.top + 1
-        else:
-            self.vy += GRAVITY
+            self.rect.bottom = floor.rect.top
+
+        # if pygame.sprite.collide_rect(self, floor) and self.rect.bottom >= floor.rect.top and self.vy >= 0:
+        #     self.vy = 0
+        #     self.rect.bottom = floor.rect.top + 1
 
     def go_left(self):
         self.vx = -PLAYER_SPEED
