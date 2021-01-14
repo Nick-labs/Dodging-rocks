@@ -59,7 +59,25 @@ class Rock(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('data/box.jpg'), (40, 80))
+
+        self.idle_images = []
+        self.run_left_images = []
+        self.run_right_images = []
+
+        for i in range(3):
+            self.idle_images.append(pygame.transform.scale(
+                pygame.image.load(f'data/character/idle/adventurer-idle-0{i}.png'), (60, 84)))
+
+        for i in range(6):
+            self.run_right_images.append(
+                pygame.transform.scale(pygame.image.load(f'data/character/run/adventurer-run-0{i}.png'), (60, 84)))
+            self.run_left_images.append(pygame.transform.flip(self.run_right_images[i], True, False))
+
+        self.image = self.idle_images[0]
+
+        self.index = 0
+        self.u = 0
+
         self.rect = self.image.get_rect()
         self.step = 3
         self.vx = 0
@@ -72,30 +90,21 @@ class Player(pygame.sprite.Sprite):
                 self.vy = 1
             else:
                 self.vy += GRAVITY
-        else:
-            pass
 
-        # Если уже на земле, то ставим позицию Y как 0
         if self.rect.bottom <= floor.rect.top:
             if pygame.sprite.collide_rect(self, floor) and self.vy >= 0:
                 self.vy = 0
                 self.rect.bottom = floor.rect.top
 
-        if pygame.sprite.collide_rect(self, floor) and self.rect.bottom >= floor.rect.top and self.vy >= 0:
+        elif pygame.sprite.collide_rect(self, floor) and self.rect.bottom >= floor.rect.top and self.vy >= 0:
             self.vy = 0
             self.rect.bottom = floor.rect.top + 1
 
     def go_left(self):
         self.vx = -PLAYER_SPEED
-        # self.image = pygame.image.load('images/player_left.png')
-        # if self.right:  # Проверяем куда он смотрит
-        #     self.right = False
 
     def go_right(self):
         self.vx = PLAYER_SPEED
-        # self.image = pygame.image.load('images/player_right.png')
-        # if not self.right:
-        #     self.right = True
 
     def stop(self):
         self.vx = 0
@@ -106,6 +115,21 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         self.calc_grav()
+
+        self.index += 1
+        if self.index >= 60:
+            self.index = 0
+            self.u += 1
+            if self.u == 2:
+                self.u = 0
+
+        if self.vx < 0:
+            self.image = self.run_left_images[self.index // 10]
+        elif self.vx > 0:
+            self.image = self.run_right_images[self.index // 10]
+        else:
+            self.image = self.idle_images[self.u]
+            print(self.rect.bottom)
 
         self.rect.x += self.vx
         self.rect.y += self.vy
@@ -262,7 +286,7 @@ while running:
         last_time = now
 
     player_group.update()
-    # rocks_group.update()
+    rocks_group.update()
     floor_group.update()
 
     screen.fill((0, 0, 0))
