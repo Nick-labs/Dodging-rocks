@@ -38,18 +38,16 @@ class Rock(pygame.sprite.Sprite):
         if pygame.sprite.collide_mask(self, player):
             player.kill()
 
-        # if pygame.sprite.spritecollide(self, player_group, False):
-        #     player.kill()
-
         if self.rect.left <= 0 or self.rect.right >= WIDTH:
             self.vx = -self.vx
 
-        if self.touches < 2:
-            if pygame.sprite.collide_rect(self, floor):
-                self.touches += 1
-                self.rect.bottom = floor.rect.top
-                self.vy = -self.vy * 0.6
-        elif self.rect.top >= HEIGHT:
+        if self.touches < 2 and pygame.sprite.collide_rect(self, floor):
+            self.touches += 1
+            self.rect.bottom = floor.rect.top
+            self.vy = -self.vy * 0.6
+        if self.rect.top >= HEIGHT:
+            print('kill')
+            print(rocks_group)
             self.kill()
 
 
@@ -61,22 +59,27 @@ class Player(pygame.sprite.Sprite):
         self.step = 3
         self.vx = 0
         self.vy = 0
-        self.radius = self.rect.height
 
     def calc_grav(self):
-        if self.vy == 0:
-            self.vy = 1
+        on_ground = pygame.sprite.collide_rect(self, floor)
+        if not on_ground:
+            if self.vy == 0:
+                self.vy = 1
+            else:
+                self.vy += GRAVITY
         else:
-            self.vy += GRAVITY
+            pass
 
         # Если уже на земле, то ставим позицию Y как 0
-        if pygame.sprite.collide_rect(self, floor) and self.vy >= 0:
+        if self.rect.bottom <= floor.rect.top + self.vy:
+            if pygame.sprite.collide_rect(self, floor) and self.vy >= 0:
+                self.vy = 0
+                self.rect.bottom = floor.rect.top
+        else:
+            pass
+        if pygame.sprite.collide_rect(self, floor) and self.rect.bottom >= floor.rect.top and self.vy >= 0:
             self.vy = 0
-            self.rect.bottom = floor.rect.top
-
-        # if pygame.sprite.collide_rect(self, floor) and self.rect.bottom >= floor.rect.top and self.vy >= 0:
-        #     self.vy = 0
-        #     self.rect.bottom = floor.rect.top + 1
+            self.rect.bottom = floor.rect.top + 1
 
     def go_left(self):
         self.vx = -PLAYER_SPEED
@@ -193,6 +196,7 @@ while running:
                 player.jump()
 
             if event.key == pygame.K_1:
+                rocks_group.add(Rock())
                 floor.rect.bottom = HEIGHT // 2
                 # WIDTH, HEIGHT = 800, 600
                 # FLOOR = HEIGHT * 8 // 10
@@ -252,7 +256,7 @@ while running:
 
     pygame.display.flip()
 
-    print(clock.get_fps())
+    # print(clock.get_fps())
     clock.tick(FPS)
 
 pygame.quit()
