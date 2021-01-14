@@ -36,9 +36,7 @@ class Rock(pygame.sprite.Sprite):
 
         if pygame.sprite.collide_mask(self, player):
             player.kill()
-
-        # if pygame.sprite.spritecollide(self, player_group, False):
-        #     player.kill()
+            particle.kill()  # когда умирает player тогда исчестает след бега
 
         if self.rect.left <= 0 or self.rect.right >= WIDTH:
             self.vx = -self.vx
@@ -212,7 +210,7 @@ while running:
 
             if event.key == pygame.K_UP:
                 player.jump()
-                flag_movement = False
+                flag_movement = True
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT and player.vx < 0:
@@ -238,7 +236,7 @@ while running:
         last_time = now
 
     player_group.update()
-    rocks_group.update()
+    # rocks_group.update()
 
     """передает координаты чтобы следы были прямо за объектом player"""
     particle_group.update(player.rect.bottomright, player.rect.bottomleft, flag)
@@ -250,7 +248,9 @@ while running:
     rocks_group.draw(screen)
 
     """Будет рисовать следы если только двтгаеться"""
-    if flag_movement:
+    if not flag_movement or player.rect.bottom < 480:
+        pass
+    else:
         particle_group.draw(screen)
 
     # screen.blit(bg, (0, FLOOR))
@@ -266,7 +266,6 @@ while running:
         screen.blit(font.render(f'{time / 1000:06.1f}s', True, (0, 0, 0)), (5, HEIGHT - 48))
 
     pygame.display.flip()
-
     # print(clock.get_fps())
     clock.tick(FPS)
 pygame.quit()
