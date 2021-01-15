@@ -175,9 +175,9 @@ def load_image(name, colorkey=None):
 class Particle(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image_to_left = pygame.transform.scale(pygame.image.load('data/particle.png'), (26, 26))
+        self.image_to_left = pygame.transform.scale(pygame.image.load('data/particle.png'), (40, 30))
         self.image = self.image_to_left
-        self.image_to_right = pygame.transform.scale(pygame.image.load('data/particle_r.png'), (26, 26))
+        self.image_to_right = pygame.transform.scale(pygame.image.load('data/particle_r.png'), (40, 30))
         self.rect = self.image.get_rect()
 
     def update(self):
@@ -188,6 +188,39 @@ class Particle(pygame.sprite.Sprite):
         else:
             self.rect.left = player.rect.right
             self.image = self.image_to_left
+
+
+# !!!!
+class ParticleStone(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.images = [
+            pygame.transform.scale(pygame.image.load('data/rock_particles/particle1.png'), (15, 15)),
+            pygame.transform.scale(pygame.image.load('data/rock_particles/particle2.png'), (15, 15)),
+            pygame.transform.scale(pygame.image.load('data/rock_particles/particle3.png'), (15, 15)),
+            pygame.transform.scale(pygame.image.load('data/rock_particles/particle4.png'), (15, 15)),
+            pygame.transform.scale(pygame.image.load('data/rock_particles/particle5.png'), (15, 15))
+        ]
+        # self.image_to_left = pygame.transform.scale(pygame.image.load('data/rock_particles/'), (26, 26))
+        self.image = random.choice(self.images)
+        # self.image_to_right = pygame.transform.scale(pygame.image.load('data/particle_r.png'), (26, 26))
+        self.rect = self.image.get_rect()
+
+    def update(self):
+        self.rect.bottom = Rock().rect.bottom
+        if Rock().vy > 0:
+            self.rect.right = Rock().rect.left
+            self.image = random.choice(self.images)
+        else:
+            self.rect.left = Rock().rect.right
+            self.image = random.choice(self.images)
+        if pygame.sprite.collide_rect(Rock(), floor):
+            print(1, Rock().rect.bottom, floor.rect.top)
+            Rock().rect.bottom = floor.rect.top
+            print(2, Rock().rect.bottom, floor.rect.top)
+            print(Rock().vy)
+            Rock().vy = -Rock().vy * 0.6
+            print(Rock().vy)
 
 
 def intro():
@@ -226,6 +259,9 @@ player_group = pygame.sprite.Group(player)
 
 particle = Particle()
 particle_group = pygame.sprite.Group(particle)
+# !!!!!
+particle_stone = ParticleStone()
+particle_stone_group = pygame.sprite.Group(particle_stone)
 
 rocks_group = pygame.sprite.Group()
 
@@ -249,6 +285,9 @@ while running:
                 player.go_right()
 
             if event.key == pygame.K_UP:
+                player.jump()
+
+            if event.key == pygame.K_SPACE:
                 player.jump()
 
             if event.key == pygame.K_1:
