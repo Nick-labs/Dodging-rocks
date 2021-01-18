@@ -3,6 +3,7 @@ import random
 import os
 import sys
 import credits
+import main_menu
 
 WIDTH, HEIGHT = 800, 600
 FPS = 60
@@ -210,12 +211,15 @@ def intro():
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+main_menu.main_menu(screen)
+
 pygame.display.set_caption('Dodging rocks')
 
 clock = pygame.time.Clock()
 font = pygame.font.SysFont('arial', 40)
 
-intro()
+# intro()
 
 bg = pygame.transform.scale(pygame.image.load('data/backgrounds/cave.jpg'), (WIDTH, HEIGHT))
 floor = pygame.image.load('data/floor.jpg')
@@ -234,12 +238,14 @@ floor_group = pygame.sprite.Group(floor)
 
 last_time = 0
 time = 0
+timee = 0
 
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            pygame.quit()
+            quit()
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
@@ -329,11 +335,23 @@ while running:
         screen.blit(font.render(f'{time / 1000:06.1f}s', True, (0, 0, 0)), (5, HEIGHT - 48))
 
     if not player_group:
-        credits.end_credits()
+        if not timee:
+            timee = now
+        if now - timee >= 5000:
+            break
 
     pygame.display.flip()
     print(clock.get_fps())
 
     clock.tick(FPS)
 
+credits.end_credits(screen)
 pygame.quit()
+
+# menu = pygame_menu.Menu(HEIGHT, WIDTH, 'Welcome',
+#                         theme=pygame_menu.themes.THEME_BLUE)
+#
+# menu.add_text_input('Name :', default='John Doe')
+# menu.add_selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
+# menu.add_button('Quit', pygame_menu.events.EXIT)
+# menu.mainloop(screen)

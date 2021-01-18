@@ -2,13 +2,9 @@ import pygame
 from pygame.locals import *
 
 
-def end_credits():
-    pygame.init()
-    pygame.display.set_caption('End credits')
-    screen = pygame.display.set_mode((800, 600))
+def end_credits(screen):
     screen_r = screen.get_rect()
     font = pygame.font.Font('data/fonts/MidnightMinutes.otf', 36)
-    # font = pygame.font.Font('data/fonts/WarPriestRotalic.ttf', 36)
     clock = pygame.time.Clock()
 
     credit_list = ["CREDITS", "OUR GAME", " ", " ",
