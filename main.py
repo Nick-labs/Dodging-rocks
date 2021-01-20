@@ -257,6 +257,9 @@ while running:
             if event.key == pygame.K_UP:
                 player.jump()
 
+            if event.key == pygame.K_SPACE:
+                player.jump()
+
             if event.key == pygame.K_1:
                 rocks_group.add(Rock())
                 floor.rect.bottom = HEIGHT // 2
