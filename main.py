@@ -208,6 +208,15 @@ def intro():
         clock.tick(15)
 
 
+def draw_level(now):
+    if now < 15000:
+        font = pygame.font.Font(None, 100)
+        text = font.render(str(2), True, (255, 0, 0))
+        text_x = WIDTH // 2 - text.get_width() // 2
+        text_y = HEIGHT // 2 - text.get_height() // 2
+        screen.blit(text, (text_x, text_y))
+
+
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -222,6 +231,7 @@ font = pygame.font.SysFont('arial', 40)
 # intro()
 
 bg = pygame.transform.scale(pygame.image.load('data/backgrounds/cave.jpg'), (WIDTH, HEIGHT))
+bg2 = pygame.transform.scale(pygame.image.load('data/backgrounds/bg2.png'), (WIDTH, HEIGHT))
 floor = pygame.image.load('data/floor.jpg')
 floor = pygame.transform.scale(floor, (WIDTH, floor.get_height()))
 
@@ -314,8 +324,14 @@ while running:
     rocks_group.update()
     floor_group.update()
 
-    screen.fill((0, 0, 0))
-    screen.blit(bg, (0, 0))
+    if now > 10000:
+        # floor = pygame.image.load('data/floor2.1.png')
+        screen.fill((0, 0, 0))
+        screen.blit(bg2, (0, 0))
+        draw_level(now)
+    else:
+        screen.fill((0, 0, 0))
+        screen.blit(bg, (0, 0))
 
     player_group.draw(screen)
     rocks_group.draw(screen)
@@ -344,8 +360,7 @@ while running:
             break
 
     pygame.display.flip()
-    print(clock.get_fps())
-
+    # print(clock.get_fps())
     clock.tick(FPS)
 
 credits.end_credits(screen)
