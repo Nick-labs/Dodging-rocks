@@ -194,16 +194,15 @@ class Particle(pygame.sprite.Sprite):
 class ParticleStone(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.images = [
-            pygame.transform.scale(pygame.image.load('data/rock_particles/particle1.png'), (15, 15)),
-            pygame.transform.scale(pygame.image.load('data/rock_particles/particle2.png'), (15, 15)),
-            pygame.transform.scale(pygame.image.load('data/rock_particles/particle3.png'), (15, 15)),
-            pygame.transform.scale(pygame.image.load('data/rock_particles/particle4.png'), (15, 15)),
-            pygame.transform.scale(pygame.image.load('data/rock_particles/particle5.png'), (15, 15))
-        ]
-        # self.image_to_left = pygame.transform.scale(pygame.image.load('data/rock_particles/'), (26, 26))
-        self.image = random.choice(self.images)
-        # self.image_to_right = pygame.transform.scale(pygame.image.load('data/particle_r.png'), (26, 26))
+        # self.images = [
+        #     c,
+        #     pygame.transform.scale(pygame.image.load('data/rock_particles/particle2.png'), (15, 15)),
+        #     pygame.transform.scale(pygame.image.load('data/rock_particles/particle3.png'), (15, 15)),
+        #     pygame.transform.scale(pygame.image.load('data/rock_particles/particle4.png'), (15, 15)),
+        #     pygame.transform.scale(pygame.image.load('data/rock_particles/particle5.png'), (15, 15))
+        # ]
+        # self.image = random.choice(self.images)
+        self.image = pygame.transform.scale(pygame.image.load('data/rock_particles/particle2.png'), (50, 50))
         self.rect = self.image.get_rect()
 
     def update(self):
