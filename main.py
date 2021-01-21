@@ -149,9 +149,12 @@ class Rock(pygame.sprite.Sprite):
 
 
 class Floor(pygame.sprite.Sprite):
-    def __init__(self, h):
+    def __init__(self, h, flag):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('data/floor.png')
+        if flag:
+            self.image = pygame.image.load('data/floor.png')
+        else:
+            self.image = pygame.transform.scale(pygame.image.load('data/floor2.1.png'), (900, 100))
         self.rect = self.image.get_rect()
         self.rect.y = h
 
@@ -232,7 +235,8 @@ font = pygame.font.SysFont('arial', 40)
 
 bg = pygame.transform.scale(pygame.image.load('data/backgrounds/cave.jpg'), (WIDTH, HEIGHT))
 bg2 = pygame.transform.scale(pygame.image.load('data/backgrounds/bg2.png'), (WIDTH, HEIGHT))
-floor = pygame.image.load('data/floor.jpg')
+# floor = pygame.image.load('data/floor.jpg')
+floor = pygame.image.load('data/floor2.1.png')
 floor = pygame.transform.scale(floor, (WIDTH, floor.get_height()))
 
 player = Player()
@@ -242,9 +246,11 @@ particle = Particle()
 particle_group = pygame.sprite.Group(particle)
 
 rocks_group = pygame.sprite.Group()
+# это флаг для перемены floor при 2 уровне
+flag_floor = True
 
-floor = Floor(FLOOR)
-floor_group = pygame.sprite.Group(floor)
+# floor = Floor(FLOOR, flag_floor)
+# floor_group = pygame.sprite.Group(floor)
 
 last_time = 0
 time = 0
@@ -252,6 +258,10 @@ timee = 0
 
 running = True
 while running:
+    # прюшлось сюда поставить чтоб флаг нормально работал
+    floor = Floor(FLOOR, flag_floor)
+    floor_group = pygame.sprite.Group(floor)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -324,14 +334,17 @@ while running:
     rocks_group.update()
     floor_group.update()
 
-    if now > 10000:
+    # это переход на второй уровень
+    # еще надо поменять время!
+    if now < 10000:
+        screen.fill((0, 0, 0))
+        screen.blit(bg, (0, 0))
+    else:
         # floor = pygame.image.load('data/floor2.1.png')
         screen.fill((0, 0, 0))
         screen.blit(bg2, (0, 0))
         draw_level(now)
-    else:
-        screen.fill((0, 0, 0))
-        screen.blit(bg, (0, 0))
+        flag_floor = False
 
     player_group.draw(screen)
     rocks_group.draw(screen)
