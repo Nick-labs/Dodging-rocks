@@ -109,9 +109,12 @@ class Player(pygame.sprite.Sprite):
 
 
 class Rock(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, flag):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('data/flax.png'), ROCK_SIZE)
+        if flag:
+            self.image = pygame.transform.scale(pygame.image.load('data/flax.png'), ROCK_SIZE)
+        else:
+            self.image = pygame.transform.scale(pygame.image.load('data/rock2.png'), ROCK_SIZE)
         self.orig_image = self.image.copy()
 
         self.rect = self.image.get_rect()
@@ -249,8 +252,7 @@ rocks_group = pygame.sprite.Group()
 # это флаг для перемены floor при 2 уровне
 flag_floor = True
 
-# floor = Floor(FLOOR, flag_floor)
-# floor_group = pygame.sprite.Group(floor)
+flag_rock = True
 
 last_time = 0
 time = 0
@@ -281,7 +283,7 @@ while running:
                 player.jump()
 
             if event.key == pygame.K_1:
-                rocks_group.add(Rock())
+                rocks_group.add(Rock(flag_rock))
                 floor.rect.bottom = HEIGHT // 2
                 # WIDTH, HEIGHT = 800, 600
                 # FLOOR = HEIGHT * 8 // 10
@@ -327,7 +329,7 @@ while running:
         fall_time = 700
 
     if now - last_time >= fall_time:
-        rocks_group.add(Rock())
+        rocks_group.add(Rock(flag_rock))
         last_time = now
 
     player_group.update()
@@ -345,6 +347,7 @@ while running:
         screen.blit(bg2, (0, 0))
         draw_level(now)
         flag_floor = False
+        flag_rock = False
 
     player_group.draw(screen)
     rocks_group.draw(screen)
