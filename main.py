@@ -19,6 +19,8 @@ PLAYER_JUMP_FORCE = -10
 
 fall_time = 1500  # задержка между камнями в миллисекундах
 
+rock_acceleration = 0  # ускорение камней по мере уровней
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -132,7 +134,7 @@ class Rock(pygame.sprite.Sprite):
 
     def update(self):
 
-        self.vy += GRAVITY
+        self.vy += GRAVITY + rock_acceleration
         self.rect.x += self.vx
         self.rect.y += self.vy
 
@@ -354,13 +356,15 @@ while running:
     if now <= 10000:
         screen.fill((0, 0, 0))
         screen.blit(bg, (0, 0))
-    elif now >= 15000:
+    elif now >= 20000:
+        rock_acceleration = 0.5
         screen.fill((0, 0, 0))
         screen.blit(bg3, (0, 0))
         draw_level(now)
         flag_floor = 3
         flag_rock = 3
     else:
+        rock_acceleration = 0.25
         screen.fill((0, 0, 0))
         screen.blit(bg2, (0, 0))
         draw_level(now)
@@ -370,7 +374,6 @@ while running:
     player_group.draw(screen)
     rocks_group.draw(screen)
     floor_group.draw(screen)
-
     if player.vx and player.rect.bottom >= floor.rect.top:
         particle_group.update()
         particle_group.draw(screen)
