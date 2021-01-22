@@ -111,10 +111,12 @@ class Player(pygame.sprite.Sprite):
 class Rock(pygame.sprite.Sprite):
     def __init__(self, flag):
         pygame.sprite.Sprite.__init__(self)
-        if flag:
+        if flag == 1:
             self.image = pygame.transform.scale(pygame.image.load('data/flax.png'), ROCK_SIZE)
-        else:
+        elif flag == 2:
             self.image = pygame.transform.scale(pygame.image.load('data/rock2.png'), ROCK_SIZE)
+        elif flag == 3:
+            self.image = pygame.transform.scale(pygame.image.load('data/rock3.png'), ROCK_SIZE)
         self.orig_image = self.image.copy()
 
         self.rect = self.image.get_rect()
@@ -154,10 +156,14 @@ class Rock(pygame.sprite.Sprite):
 class Floor(pygame.sprite.Sprite):
     def __init__(self, h, flag):
         pygame.sprite.Sprite.__init__(self)
-        if flag:
+        if flag == 1:
             self.image = pygame.image.load('data/floor.png')
-        else:
+
+        elif flag == 2:
             self.image = pygame.transform.scale(pygame.image.load('data/floor2.1.png'), (900, 100))
+
+        elif flag == 3:
+            self.image = pygame.transform.scale(pygame.image.load('data/floor3.2.png'), (900, 100))
         self.rect = self.image.get_rect()
         self.rect.y = h
 
@@ -221,6 +227,12 @@ def draw_level(now):
         text_x = WIDTH // 2 - text.get_width() // 2
         text_y = HEIGHT // 2 - text.get_height() // 2
         screen.blit(text, (text_x, text_y))
+    else:
+        font = pygame.font.Font(None, 100)
+        text = font.render(str(3), True, (255, 0, 0))
+        text_x = WIDTH // 2 - text.get_width() // 2
+        text_y = HEIGHT // 2 - text.get_height() // 2
+        screen.blit(text, (text_x, text_y))
 
 
 pygame.init()
@@ -238,6 +250,7 @@ font = pygame.font.SysFont('arial', 40)
 
 bg = pygame.transform.scale(pygame.image.load('data/backgrounds/cave.jpg'), (WIDTH, HEIGHT))
 bg2 = pygame.transform.scale(pygame.image.load('data/backgrounds/bg2.png'), (WIDTH, HEIGHT))
+bg3 = pygame.transform.scale(pygame.image.load('data/backgrounds/bg3.png'), (WIDTH, HEIGHT))
 # floor = pygame.image.load('data/floor.jpg')
 floor = pygame.image.load('data/floor2.1.png')
 floor = pygame.transform.scale(floor, (WIDTH, floor.get_height()))
@@ -250,9 +263,9 @@ particle_group = pygame.sprite.Group(particle)
 
 rocks_group = pygame.sprite.Group()
 # это флаг для перемены floor при 2 уровне
-flag_floor = True
+flag_floor = 1
 
-flag_rock = True
+flag_rock = 1
 
 last_time = 0
 time = 0
@@ -336,18 +349,23 @@ while running:
     rocks_group.update()
     floor_group.update()
 
-    # это переход на второй уровень
+    # это переход уровней
     # еще надо поменять время!
-    if now < 10000:
+    if now <= 10000:
         screen.fill((0, 0, 0))
         screen.blit(bg, (0, 0))
+    elif now >= 15000:
+        screen.fill((0, 0, 0))
+        screen.blit(bg3, (0, 0))
+        draw_level(now)
+        flag_floor = 3
+        flag_rock = 3
     else:
-        # floor = pygame.image.load('data/floor2.1.png')
         screen.fill((0, 0, 0))
         screen.blit(bg2, (0, 0))
         draw_level(now)
-        flag_floor = False
-        flag_rock = False
+        flag_floor = 2
+        flag_rock = 2
 
     player_group.draw(screen)
     rocks_group.draw(screen)
