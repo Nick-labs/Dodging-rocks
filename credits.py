@@ -7,7 +7,7 @@ def end_credits(screen):
     font = pygame.font.Font('data/fonts/MidnightMinutes.otf', 36)
     clock = pygame.time.Clock()
 
-    credit_list = ["CREDITS", "OUR GAME", " ", " ",
+    credit_list = [" "," "," "," ", "CREDITS", "OUR GAME", " ", " ",
                    "DEVELOPMENT", " ", "FOMIN NIKITA", "ROMANOV SEMEN", " ",
                    "IDEA", " ", "ROMANOV SEMEN", "FOMIN NIKITA", " ",
                    "TESTING", " ", "FOMIN NIKITA", "ROMANOV SEMEN", " ",

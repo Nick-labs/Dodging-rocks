@@ -145,6 +145,7 @@ class Rock(pygame.sprite.Sprite):
             self.vx = -self.vx
 
         if self.touches < 1 and pygame.sprite.collide_rect(self, floor):
+            fall_sound.play()
             self.touches += 1
             self.rect.bottom = floor.rect.top
             self.vy = -self.vy * 0.5
@@ -211,14 +212,14 @@ class Particle(pygame.sprite.Sprite):
 
 def intro():
     smallfont = pygame.font.SysFont(None, 30)
-    intro = True
-    while intro:
+    is_intro = True
+    while is_intro:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
             elif event.type == pygame.KEYDOWN:
-                intro = False
+                is_intro = False
         screen.fill((255, 255, 255))
         text = smallfont.render("press any key to continue", True, (0, 0, 0))
         screen.blit(text, [320, 240])
@@ -251,6 +252,8 @@ bg = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/cave.jpg
 bg2 = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/bg2.png'), (WIDTH, HEIGHT))
 bg3 = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/bg3.png'), (WIDTH, HEIGHT))
 
+fall_sound = pygame.mixer.Sound('data/sfx/fall.ogg')
+
 player = Player()
 player_group = pygame.sprite.Group(player)
 
@@ -269,7 +272,6 @@ floor = Floor(FLOOR)
 floor_group = pygame.sprite.Group(floor)
 
 start_time = pygame.time.get_ticks()
-print(start_time)
 
 running = True
 while running:
