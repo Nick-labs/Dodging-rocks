@@ -4,6 +4,13 @@ import os
 import sys
 import credits
 import main_menu
+import sqlite3
+
+con = sqlite3.connect('rating.db')
+
+cur = con.cursor()
+rating_time = 0
+
 
 WIDTH, HEIGHT = 800, 600
 FPS = 60
@@ -373,8 +380,16 @@ while running:
         if not timee:
             timee = now
         if now - timee >= 5000:
-            break
-
+            if timee != 0:
+                cur.execute(f"INSERT INTO columns(time) VALUES(?)", (str(timee),)).fetchall()
+                con.commit()
+                con.close()
+                break
+            continue
+        # if timee != 0:
+        #     cur.execute(f"INSERT INTO columns(time) VALUES(?)", (str(timee),)).fetchall()
+        #     con.commit()
+        #     con.close()
     pygame.display.flip()
     # print(clock.get_fps())
     clock.tick(FPS)
