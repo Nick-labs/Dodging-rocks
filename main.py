@@ -11,7 +11,6 @@ import sqlite3
 con = sqlite3.connect('rating.db')
 cur = con.cursor()
 
-
 WIDTH, HEIGHT = 800, 600  # Размеры экрана
 FPS = 60
 
@@ -285,8 +284,6 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 end_time = 0
 
-main_menu(screen)  # Начальное меню
-
 pygame.display.set_caption('Dodging rocks')  # Название игры и окна
 
 clock = pygame.time.Clock()
@@ -302,9 +299,9 @@ rock_fall_sound = pygame.mixer.Sound('data/sfx/fall.ogg')
 cat_fall_sounds = [pygame.mixer.Sound('data/sfx/meow.ogg'), pygame.mixer.Sound('data/sfx/meow1.ogg'),
                    pygame.mixer.Sound('data/sfx/meow2.ogg'), pygame.mixer.Sound('data/sfx/meow3.ogg')]
 blob_sound = pygame.mixer.Sound('data/sfx/water.ogg')
-start_time = pygame.time.get_ticks()
 
 while True:
+    main_menu(screen)  # Начальное меню
     'Создаем основные игровые объекты'
     player = Player()
     player_group = pygame.sprite.Group(player)
@@ -328,6 +325,7 @@ while True:
     time = 0
     timee = 0
 
+    start_time = pygame.time.get_ticks()
     running = True
     while running:
         for event in pygame.event.get():
@@ -361,7 +359,7 @@ while True:
                     player.stop()
 
         'Высчитываем время с начала текущей игры'
-        now = pygame.time.get_ticks() - start_time - end_time
+        now = pygame.time.get_ticks() - start_time
 
         'Создаем камни'
         if now - last_time >= fall_time:
@@ -442,17 +440,6 @@ while True:
                 timee = now
             if now - timee >= 5000:
                 break
-                
-        if not player_group:
-            if not timee:
-                timee = now
-            if now - timee >= 5000:
-                if timee != 0:
-                    cur.execute(f"INSERT INTO columns(time) VALUES(?)", (str(timee),)).fetchall()
-                    con.commit()
-                    con.close()
-                    break
-                continue        
 
         pygame.display.flip()
         # print(clock.get_fps())
@@ -460,15 +447,16 @@ while True:
 
     'Показываем титры'
     credits.end_credits(screen)
-    end_time = pygame.time.get_ticks()
-    start_time = 0
     rock_size = (80, 80)  # Размеры камней
     fall_time = 1500  # Задержка между камнями в миллисекундах
     rock_acceleration = 0  # Ускорение падения камней
 
-        # if timee != 0:
-        #     cur.execute(f"INSERT INTO columns(time) VALUES(?)", (str(timee),)).fetchall()
-        #     con.commit()
-        #     con.close()
+    cur.execute(f"INSERT INTO columns(time) VALUES(?)", (str(timee),)).fetchall()
+    con.commit()
+    con.close()
 
+    end_time = pygame.time.get_ticks()
+    start_time = 0
+
+con.close()
 pygame.quit()

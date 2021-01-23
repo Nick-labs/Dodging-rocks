@@ -17,11 +17,11 @@ def end_credits(screen):
                 pygame.quit()
                 quit()
             if event.type == pygame.KEYDOWN:
-                print(1)
                 if event.key == pygame.K_ESCAPE:
                     is_intro = False
                 elif event.key == pygame.K_SPACE:
                     return
+
         screen.fill((255, 255, 255))
         text = smallfont.render("Press ESC to finish game", True, (0, 0, 0))
         text2 = smallfont.render("Press SPACE to restart", True, (0, 0, 0))
@@ -45,9 +45,12 @@ def end_credits(screen):
 
     while True:
         for e in pygame.event.get():
-            if e.type == QUIT or e.type == KEYDOWN and e.key == pygame.K_ESCAPE:
+            if e.type == QUIT:
                 pygame.quit()
                 exit()
+
+            elif e.type == KEYDOWN and (e.key == pygame.K_ESCAPE or e.key == pygame.K_SPACE):
+                return
 
         screen.fill((255, 255, 255))
 
