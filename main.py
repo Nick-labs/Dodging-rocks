@@ -9,7 +9,6 @@ import sqlite3
 con = sqlite3.connect('rating.db')
 
 cur = con.cursor()
-rating_time = 0
 
 
 WIDTH, HEIGHT = 800, 600
