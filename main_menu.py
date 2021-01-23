@@ -3,11 +3,10 @@ from pygame.locals import *
 import os
 
 
-def text_format(message, textFont, textSize, textColor):
-    newFont = pygame.font.Font(textFont, textSize)
-    newText = newFont.render(message, 0, textColor)
-
-    return newText
+def text_format(message, text_font, text_size, text_color):
+    new_font = pygame.font.Font(text_font, text_size)
+    new_text = new_font.render(message, 0, text_color)
+    return new_text
 
 
 # Colors
@@ -27,7 +26,7 @@ font = "data/fonts/WarPriest.ttf"
 def main_menu(screen):
     menu = True
     selected = "start"
-    clock = pygame.time.Clock()
+    # clock = pygame.time.Clock()
 
     while menu:
         for event in pygame.event.get():
@@ -74,4 +73,4 @@ def main_menu(screen):
 
         pygame.display.update()
         pygame.time.Clock().tick(30)
-        pygame.display.set_caption("Python - Pygame Simple Main Menu Selection")
+        pygame.display.set_caption("Главное меню")
