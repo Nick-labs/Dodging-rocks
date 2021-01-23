@@ -10,7 +10,7 @@ WIDTH, HEIGHT = 800, 600
 FPS = 60
 
 FLOOR = HEIGHT * 0.85
-ROCK_SIZE = (80, 80)
+rock_size = (80, 80)
 PLAYER_SIZE = (40, 56)
 
 GRAVITY = 0.25
@@ -115,11 +115,11 @@ class Rock(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         if level_theme == 1:
-            self.image = pygame.transform.scale(pygame.image.load('data/sprites/rocks/rock.png'), ROCK_SIZE)
+            self.image = pygame.transform.scale(pygame.image.load('data/sprites/rocks/rock.png'), rock_size)
         elif level_theme == 2:
-            self.image = pygame.transform.scale(pygame.image.load('data/sprites/rocks/flax.png'), ROCK_SIZE)
+            self.image = pygame.transform.scale(pygame.image.load('data/sprites/rocks/flax.png'), rock_size)
         elif level_theme == 3:
-            self.image = pygame.transform.scale(pygame.image.load('data/sprites/rocks/rock3.png'), ROCK_SIZE)
+            self.image = pygame.transform.scale(pygame.image.load('data/sprites/rocks/rock3.png'), rock_size)
         self.orig_image = self.image.copy()
 
         self.rect = self.image.get_rect()
@@ -145,7 +145,12 @@ class Rock(pygame.sprite.Sprite):
             self.vx = -self.vx
 
         if self.touches < 1 and pygame.sprite.collide_rect(self, floor):
-            fall_sound.play()
+            if level_theme == 1:
+                rock_fall_sound.play()
+            elif level_theme == 2:
+                random.choice(cat_fall_sounds).play()
+            else:
+                blob_sound.play()
             create_particles(self.rect.midbottom)
             self.touches += 1
             self.rect.bottom = floor.rect.top
@@ -248,7 +253,7 @@ class RockParticle(pygame.sprite.Sprite):
 
 def create_particles(pos):
     for _ in range(random.randint(4, 11)):
-        RockParticle(pos, random.randint(-12, 13), random.randint(-2, 8))
+        RockParticle(pos, random.randint(-8, 9), random.randint(-2, 8))
 
 
 def intro():
@@ -291,7 +296,10 @@ bg = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/cave.jpg
 bg2 = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/bg2.png'), (WIDTH, HEIGHT))
 bg3 = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/bg3.png'), (WIDTH, HEIGHT))
 
-fall_sound = pygame.mixer.Sound('data/sfx/fall.ogg')
+rock_fall_sound = pygame.mixer.Sound('data/sfx/fall.ogg')
+cat_fall_sounds = [pygame.mixer.Sound('data/sfx/meow.ogg'), pygame.mixer.Sound('data/sfx/meow1.ogg'),
+                   pygame.mixer.Sound('data/sfx/meow2.ogg'), pygame.mixer.Sound('data/sfx/meow3.ogg')]
+blob_sound = pygame.mixer.Sound('data/sfx/water.ogg')
 
 player = Player()
 player_group = pygame.sprite.Group(player)
@@ -301,7 +309,6 @@ particle_group = pygame.sprite.Group(particle)
 
 rocks_group = pygame.sprite.Group()
 rock_particles_group = pygame.sprite.Group()
-
 
 level_theme = 1
 
@@ -340,7 +347,7 @@ while running:
                 # WIDTH, HEIGHT = 800, 600
                 # FLOOR = HEIGHT * 8 // 10
                 # floor.rect.y = FLOOR
-                # ROCK_SIZE = (100, 100)
+                # rock_size = (100, 100)
                 # screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
             if event.key == pygame.K_2:
@@ -348,7 +355,7 @@ while running:
                 # WIDTH, HEIGHT = 400, 400
                 # FLOOR = HEIGHT * 8 // 10
                 # floor.rect.y = FLOOR
-                # ROCK_SIZE = (50, 50)
+                # rock_size = (50, 50)
                 # screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
         if event.type == pygame.KEYUP:
@@ -365,20 +372,6 @@ while running:
         player.rect.left = 0
 
     now = pygame.time.get_ticks() - start_time
-    if now < 5000:
-        fall_time = 99999
-    elif now < 10000:
-        fall_time = 1500
-    elif now < 15000:
-        fall_time = 1200
-    elif now < 20000:
-        fall_time = 1000
-    elif now < 25000:
-        fall_time = 900
-    elif now < 30000:
-        fall_time = 800
-    else:
-        fall_time = 700
 
     if now - last_time >= fall_time:
         rocks_group.add(Rock())
@@ -389,21 +382,43 @@ while running:
     floor_group.update()
     rock_particles_group.update()
 
-    # это переход уровней
-    # еще надо поменять время!
-    # screen.fill((0, 0, 0))
-
-    if now <= 10000:
+    if now < 5000:
+        fall_time = 99999
         screen.blit(bg, (0, 0))
-    elif now >= 20000:
-        rock_acceleration = 0.2
+
+    elif now <= 10000:
+        fall_time = 1500
+        screen.blit(bg, (0, 0))
+        rock_acceleration = 0.1
+
+    elif now < 12000:
+        fall_time = 99999
+        screen.blit(bg, (0, 0))
+
+    elif now < 20000:
+        fall_time = 1000
+        rock_size = (120, 120)
+        rock_acceleration = 0
+        screen.blit(bg2, (0, 0))
+        level_theme = 2
+
+    elif now < 22000:
+        fall_time = 99999
+        screen.blit(bg2, (0, 0))
+
+    elif now <= 30000:
+        fall_time = 666
+        rock_size = (70, 70)
+        rock_acceleration = 0.1
         screen.blit(bg3, (0, 0))
         level_theme = 3
 
     else:
+        fall_time = 500
+        rock_size = (70, 70)
         rock_acceleration = 0.1
-        screen.blit(bg2, (0, 0))
-        level_theme = 2
+        screen.blit(bg3, (0, 0))
+        level_theme = 3
 
     draw_level_num(level_theme)
 
@@ -415,9 +430,6 @@ while running:
     if player.vx and player.rect.bottom >= floor.rect.top:
         particle_group.update()
         particle_group.draw(screen)
-
-    # screen.blit(bg, (0, FLOOR))
-    # screen.blit(floor, (0, FLOOR))
 
     pygame.draw.rect(screen, (255, 255, 255), (0, HEIGHT - 50, 125, HEIGHT))
 
