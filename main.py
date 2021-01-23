@@ -1,7 +1,7 @@
 import pygame
 import random
-# import os
-# import sys
+import os
+import sys
 
 import credits
 import main_menu
@@ -146,6 +146,7 @@ class Rock(pygame.sprite.Sprite):
 
         if self.touches < 1 and pygame.sprite.collide_rect(self, floor):
             fall_sound.play()
+            create_particles(self.rect.midbottom)
             self.touches += 1
             self.rect.bottom = floor.rect.top
             self.vy = -self.vy * 0.5
@@ -174,21 +175,21 @@ class Floor(pygame.sprite.Sprite):
             self.image = self.themes[2]
 
 
-# def load_image(name, colorkey=None):
-#     fullname = os.path.join('data', name)
-#     if not os.path.isfile(fullname):
-#         print(f"Файл с изображением '{fullname}' не найден")
-#         sys.exit()
-#     image = pygame.image.load(fullname)
-#
-#     if colorkey is not None:
-#         image = image.convert()
-#         if colorkey == -1:
-#             colorkey = image.get_at((0, 0))
-#         image.set_colorkey(colorkey)
-#     else:
-#         image = image.convert_alpha()
-#     return image
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+
+    if colorkey is not None:
+        image = image.convert()
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    else:
+        image = image.convert_alpha()
+    return image
 
 
 class Particle(pygame.sprite.Sprite):
@@ -208,6 +209,46 @@ class Particle(pygame.sprite.Sprite):
         else:
             self.rect.left = player.rect.right
             self.image = self.image_to_left
+
+
+class RockParticle(pygame.sprite.Sprite):
+    images = []
+    for i in range(1, 6):
+        images.append(pygame.image.load(f'data/sprites/rock_particles/particle{i}.png'))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(rock_particles_group)
+        self.image = random.choice(self.images)
+        self.rect = self.image.get_rect()
+
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+
+        self.gravity = GRAVITY
+
+    def update(self):
+        self.velocity[1] += self.gravity
+
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+
+        # убиваем, если частица ушла за экран
+        if not self.rect.colliderect(screen.get_rect()):
+            self.kill()
+
+        # if self.rect.y > HEIGHT:
+        #     self.kill()
+        # elif self.rect.left < 0:
+        #     self.rect.left = 0
+        #     self.velocity[0] = -self.velocity[0]
+        # elif self.rect.right > WIDTH:
+        #     self.rect.right = WIDTH
+        #     self.velocity[0] = -self.velocity[0]
+
+
+def create_particles(pos):
+    for _ in range(random.randint(4, 11)):
+        RockParticle(pos, random.randint(-12, 13), random.randint(-2, 8))
 
 
 def intro():
@@ -230,9 +271,7 @@ def intro():
 def draw_level_num(num):
     font = pygame.font.Font(None, 100)
     text = font.render(str(num), True, (255, 0, 0))
-    text_x = WIDTH - 50
-    text_y = 0
-    screen.blit(text, (text_x, text_y))
+    screen.blit(text, (WIDTH - 50, 0))
 
 
 pygame.init()
@@ -261,7 +300,9 @@ particle = Particle()
 particle_group = pygame.sprite.Group(particle)
 
 rocks_group = pygame.sprite.Group()
-# это флаг для перемены floor при 2 уровне
+rock_particles_group = pygame.sprite.Group()
+
+
 level_theme = 1
 
 last_time = 0
@@ -346,6 +387,7 @@ while running:
     player_group.update()
     rocks_group.update()
     floor_group.update()
+    rock_particles_group.update()
 
     # это переход уровней
     # еще надо поменять время!
@@ -368,6 +410,7 @@ while running:
     player_group.draw(screen)
     rocks_group.draw(screen)
     floor_group.draw(screen)
+    rock_particles_group.draw(screen)
 
     if player.vx and player.rect.bottom >= floor.rect.top:
         particle_group.update()
