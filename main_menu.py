@@ -1,8 +1,19 @@
 import pygame
 from pygame.locals import *
 import os
+import sqlite3
 
-font = "data/fonts/WarPriest.ttf"
+
+"""берем из базы данных лучшие время"""
+con = sqlite3.connect('rating.db')
+cur = con.cursor()
+result = cur.execute("""SELECT time FROM columns;""").fetchall()
+score = []
+for i in result:
+    score.append(int(i[0]) / 1000)
+score = sorted(score, reverse=True)
+score = score[:6]
+con.close()
 
 
 def text_format(message, text_font, text_size, text_color):
@@ -10,12 +21,18 @@ def text_format(message, text_font, text_size, text_color):
     new_text = new_font.render(message, 0, text_color)
     return new_text
 
+# Game Fonts
+font = "data/fonts/WarPriest.ttf"
+font_score = "data/fonts/WarPriestRotalic.ttf"
 
 def main_menu(screen):
     """Начальное меню игры"""
 
     menu = True
     selected = "start"
+    clock = pygame.time.Clock()
+    count_num_score = 0
+
 
     while menu:
         for event in pygame.event.get():
@@ -45,6 +62,7 @@ def main_menu(screen):
         else:
             text_quit = text_format("QUIT", font, 75, (50, 50, 50))
 
+        text_score = text_format("rating", font, 50, white)
         title_rect = title.get_rect()
         start_rect = text_start.get_rect()
         quit_rect = text_quit.get_rect()
@@ -52,6 +70,15 @@ def main_menu(screen):
         screen.blit(title, (400 - (title_rect[2] / 2), 80))
         screen.blit(text_start, (400 - (start_rect[2] / 2), 300))
         screen.blit(text_quit, (400 - (quit_rect[2] / 2), 360))
+        screen.blit(text_score, (30, 200, 100, 100))
+
+        # вывод в меню рейтинг времени
+        height_score = 220
+        for num in score:
+            height_score += 40
+            scores = text_format(f"{str(num)} second", font_score, 30, red)
+            screen.blit(scores, (30, height_score, 100, 100))
+
 
         pygame.display.update()
         pygame.time.Clock().tick(30)

@@ -3,7 +3,14 @@ import random
 import os
 import sys
 import credits
+
 from main_menu import main_menu
+
+import sqlite3
+
+con = sqlite3.connect('rating.db')
+cur = con.cursor()
+
 
 WIDTH, HEIGHT = 800, 600  # Размеры экрана
 FPS = 60
@@ -435,6 +442,17 @@ while True:
                 timee = now
             if now - timee >= 5000:
                 break
+                
+        if not player_group:
+            if not timee:
+                timee = now
+            if now - timee >= 5000:
+                if timee != 0:
+                    cur.execute(f"INSERT INTO columns(time) VALUES(?)", (str(timee),)).fetchall()
+                    con.commit()
+                    con.close()
+                    break
+                continue        
 
         pygame.display.flip()
         # print(clock.get_fps())
@@ -447,5 +465,10 @@ while True:
     rock_size = (80, 80)  # Размеры камней
     fall_time = 1500  # Задержка между камнями в миллисекундах
     rock_acceleration = 0  # Ускорение падения камней
+
+        # if timee != 0:
+        #     cur.execute(f"INSERT INTO columns(time) VALUES(?)", (str(timee),)).fetchall()
+        #     con.commit()
+        #     con.close()
 
 pygame.quit()
