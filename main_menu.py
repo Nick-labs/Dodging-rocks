@@ -1,6 +1,4 @@
 import pygame
-from pygame.locals import *
-import os
 import sqlite3
 
 
@@ -17,7 +15,7 @@ font_score = "data/fonts/WarPriestRotalic.ttf"
 def main_menu(screen):
     """Начальное меню игры"""
 
-    """Берем из базы данных топ-6 по времени"""
+    # Берем из базы данных топ-6 по времени
     con = sqlite3.connect('rating.db')
     cur = con.cursor()
     result = cur.execute("""SELECT time FROM columns;""").fetchall()
@@ -26,7 +24,7 @@ def main_menu(screen):
         score.append(int(i[0]) / 1000)
     score = sorted(score, reverse=True)
     score = score[:6]
-    con.close()
+
 
     menu = True
     selected = "start"

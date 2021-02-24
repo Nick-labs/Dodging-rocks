@@ -3,7 +3,11 @@ from pygame.locals import *
 
 
 def end_credits(screen):
-    """Титры и рестарт игры"""
+    """
+    Титры и рестарт игры
+    :param screen:
+    :return:
+    """
 
     screen_r = screen.get_rect()
     font = pygame.font.Font('data/fonts/MidnightMinutes.otf', 36)
