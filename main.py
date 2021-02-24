@@ -339,7 +339,7 @@ blob_sound = pygame.mixer.Sound('data/sfx/water.ogg')
 
 while True:
     main_menu(screen)  # Начальное меню
-
+    pygame.display.set_caption("Dodging rocks")
     # Создаем основные игровые объекты
     player = Player()
     player_group = pygame.sprite.Group(player)

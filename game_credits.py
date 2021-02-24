@@ -12,6 +12,7 @@ def end_credits(screen):
     screen_r = screen.get_rect()
     font = pygame.font.Font('data/fonts/MidnightMinutes.otf', 36)
     clock = pygame.time.Clock()
+    pygame.display.set_caption("Credits")
 
     smallfont = pygame.font.SysFont(None, 60)
     is_intro = True

@@ -28,7 +28,7 @@ def main_menu(screen):
 
     menu = True
     selected = "start"
-
+    pygame.display.set_caption("Главное меню")
     while menu:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -76,4 +76,3 @@ def main_menu(screen):
 
         pygame.display.update()
         pygame.time.Clock().tick(30)
-        pygame.display.set_caption("Главное меню")
