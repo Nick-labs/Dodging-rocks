@@ -2,7 +2,7 @@ import pygame
 import random
 import os
 import sys
-import credits
+import game_credits
 
 from main_menu import main_menu
 
@@ -53,7 +53,10 @@ class Player(pygame.sprite.Sprite):
         self.vy = 0
 
     def calc_grav(self):
-        """Расчитываем гравитацию"""
+        """
+        Расчитываем гравитацию
+        :return:
+        """
         on_ground = pygame.sprite.collide_rect(self, floor)
         if not on_ground:
             if self.vy == 0:
@@ -84,9 +87,13 @@ class Player(pygame.sprite.Sprite):
             self.vy = PLAYER_JUMP_FORCE
 
     def update(self):
+        """
+        обновление координат
+        :return:
+        """
         self.calc_grav()
 
-        'Анимация'
+        # Анимация
         self.index += 1
         if self.index >= 60:
             self.index = 0
@@ -108,7 +115,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.x = 100
             self.rect.y = 100
 
-        'Не даем игроку уйти за края экрана'
+        # Не даем игроку уйти за края экрана
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
 
@@ -121,7 +128,7 @@ class Rock(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        'В зависимости от уровня выбираем изображение'
+        # В зависимости от уровня выбираем изображение
         if level_theme == 1:
             self.image = pygame.transform.scale(pygame.image.load('data/sprites/rocks/rock.png'), rock_size)
         elif level_theme == 2:
@@ -141,16 +148,21 @@ class Rock(pygame.sprite.Sprite):
         self.vy = 0
 
     def update(self):
+        """
+        обновление координат
+        :return:
+        """
+
         self.vy += GRAVITY + rock_acceleration
         self.rect.x += self.vx
         self.rect.y += self.vy
 
-        'Если камень касается игрока, то убиваем игрока'
+        # Если камень касается игрока, то убиваем игрока
         if pygame.sprite.collide_mask(self, player):
             player.kill()
             particle.kill()
 
-        'Не даем улететь за края экрана'
+        # Не даем улететь за края экрана
         if self.rect.left <= 0 or self.rect.right >= WIDTH:
             self.vx = -self.vx
 
@@ -162,15 +174,15 @@ class Rock(pygame.sprite.Sprite):
             else:
                 blob_sound.play()
 
-            'Создаем частицы'
+            # Создаем частицы
             create_particles(self.rect.midbottom)
 
-            'Отскок от пола'
+            # Отскок от пола
             self.touches += 1
             self.rect.bottom = floor.rect.top
             self.vy = -self.vy * 0.5
 
-        'Если камень улетает вниз экрана, то удаляем его'
+        # Если камень улетает вниз экрана, то удаляем его
         if self.rect.top >= HEIGHT:
             self.kill()
 
@@ -188,7 +200,10 @@ class Floor(pygame.sprite.Sprite):
         self.rect.y = h
 
     def update(self):
-        'В зависимости от уровня меняем изображение'
+        """
+        В зависимости от уровня меняем изображение
+        :return:
+        """
         if level_theme == 1:
             self.image = self.themes[0]
         elif level_theme == 2:
@@ -212,8 +227,13 @@ class Particle(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def update(self):
+        """
+        обновление координат
+        :return:
+        """
+
         self.rect.bottom = player.rect.bottom
-        'Отрисовываем только если игрок движется'
+        # Отрисовываем только если игрок движется
         if player.vx > 0:
             self.rect.right = player.rect.left
             self.image = self.image_to_right
@@ -239,18 +259,27 @@ class RockParticle(pygame.sprite.Sprite):
         self.gravity = GRAVITY
 
     def update(self):
+        """
+        обновление координат
+        :return:
+        """
         self.velocity[1] += self.gravity
 
         self.rect.x += self.velocity[0]
         self.rect.y += self.velocity[1]
 
-        'Если частица улетает за экран, то удаляем ее'
+        # Если частица улетает за экран, то удаляем ее
         if not self.rect.colliderect(screen.get_rect()):
             self.kill()
 
 
 def load_image(name, colorkey=None):
-    'Загрузка изображений'
+    """
+    Загрузка изображений
+    :param name:
+    :param colorkey:
+    :return:
+    """
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -268,13 +297,21 @@ def load_image(name, colorkey=None):
 
 
 def create_particles(pos):
-    """Создание частиц, отлетающих от камня"""
+    """
+    Создание частиц, отлетающих от камня
+    :param pos:
+    :return:
+    """
     for _ in range(random.randint(4, 13)):
         RockParticle(pos, random.randint(-8, 9), random.randint(-2, 8))
 
 
 def draw_level_num(num):
-    """Отрисовка номера уровня"""
+    """
+    Отрисовка номера уровня
+    :param num:
+    :return:
+    """
     font = pygame.font.Font(None, 100)
     text = font.render(str(num), True, (248, 190, 5))
     screen.blit(text, (WIDTH - 50, 0))
@@ -294,14 +331,13 @@ pygame.display.set_caption('Dodging rocks')  # Название игры и ок
 clock = pygame.time.Clock()
 font = pygame.font.SysFont('arial', 40)
 
-'Подгружаем фоны'
+# Подгружаем фоны
 bg = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/cave.jpg'), (WIDTH, HEIGHT))
 bg2 = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/bg2.png'), (WIDTH, HEIGHT))
 bg3 = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/bg3.png'), (WIDTH, HEIGHT))
 
 timer_bg = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/timer.png'), (130, 55))
 
-'Подгружаем звуковые эффекты'
 rock_fall_sound = pygame.mixer.Sound('data/sfx/fall.ogg')
 cat_fall_sounds = [pygame.mixer.Sound('data/sfx/meow.ogg'), pygame.mixer.Sound('data/sfx/meow1.ogg'),
                    pygame.mixer.Sound('data/sfx/meow2.ogg'), pygame.mixer.Sound('data/sfx/meow3.ogg')]
@@ -309,7 +345,8 @@ blob_sound = pygame.mixer.Sound('data/sfx/water.ogg')
 
 while True:
     main_menu(screen)  # Начальное меню
-    'Создаем основные игровые объекты'
+    pygame.display.set_caption("Dodging rocks")
+    # Создаем основные игровые объекты
     player = Player()
     player_group = pygame.sprite.Group(player)
 
@@ -340,7 +377,7 @@ while True:
                 pygame.quit()
                 quit()
 
-            'Управление игроком'
+            # Управление игроком
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     player.go_left()
@@ -365,21 +402,21 @@ while True:
                 if event.key == pygame.K_RIGHT and player.vx > 0:
                     player.stop()
 
-        'Высчитываем время с начала текущей игры'
+        # Высчитываем время с начала текущей игры
         now = pygame.time.get_ticks() - start_time
 
-        'Создаем камни'
+        # Создаем камни
         if now - last_time >= fall_time:
             rocks_group.add(Rock())
             last_time = now
 
-        'Обновляем игровые объекты'
+        # Обновляем игровые объекты
         player_group.update()
         rocks_group.update()
         floor_group.update()
         rock_particles_group.update()
 
-        'Меняем тему и сложность в зависимости от прошедшего времени'
+        # Меняем тему и сложность в зависимости от прошедшего времени
         if now < 2000:
             fall_time = 99999
             screen.blit(bg, (0, 0))
@@ -418,7 +455,7 @@ while True:
             screen.blit(bg3, (0, 0))
             level_theme = 3
 
-        'Рисуем все на экране'
+        # Рисуем все на экране
         draw_level_num(level_theme)
 
         player_group.draw(screen)
@@ -426,13 +463,14 @@ while True:
         floor_group.draw(screen)
         rock_particles_group.draw(screen)
 
-        'Рисуем частицу за игроком только если он не в прыжке'
+        # Рисуем частицу за игроком только если он не в прыжке
         if player.vx and player.rect.bottom >= floor.rect.top:
             particle_group.update()
             particle_group.draw(screen)
 
         # 'Отображаем время, прошедшее с начала игры'
         # pygame.draw.rect(screen, (255, 255, 255), (0, HEIGHT - 50, 125, HEIGHT))
+
 
         if player_group:
             draw_timer(screen, now)
@@ -443,7 +481,7 @@ while True:
             draw_timer(screen, now)
             # screen.blit(font.render(f'{time / 1000:06.1f}s', True, (0, 0, 0)), (5, HEIGHT - 48))
 
-        'Если игрок умирает, запоминаем время смерти'
+        # Если игрок умирает, запоминаем время смерти
         if not player_group:
             if not timee:
                 timee = now
@@ -451,11 +489,11 @@ while True:
                 break
 
         pygame.display.flip()
-        # print(clock.get_fps())
         clock.tick(FPS)
 
-    'Показываем титры'
-    credits.end_credits(screen)
+
+    # Показываем титры
+    game_credits.end_credits(screen)
 
     rock_size = (80, 80)  # Размеры камней
     fall_time = 1500  # Задержка между камнями в миллисекундах
