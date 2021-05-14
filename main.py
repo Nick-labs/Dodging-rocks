@@ -280,6 +280,11 @@ def draw_level_num(num):
     screen.blit(text, (WIDTH - 50, 0))
 
 
+def draw_timer(screen, time):
+    screen.blit(timer_bg, (0, HEIGHT - 55))
+    screen.blit(font.render(f'{time / 1000:06.1f}s', True, (0, 0, 0)), (5, HEIGHT - 48))
+
+
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 end_time = 0
@@ -293,6 +298,8 @@ font = pygame.font.SysFont('arial', 40)
 bg = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/cave.jpg'), (WIDTH, HEIGHT))
 bg2 = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/bg2.png'), (WIDTH, HEIGHT))
 bg3 = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/bg3.png'), (WIDTH, HEIGHT))
+
+timer_bg = pygame.transform.scale(pygame.image.load('data/sprites/backgrounds/timer.png'), (130, 55))
 
 'Подгружаем звуковые эффекты'
 rock_fall_sound = pygame.mixer.Sound('data/sfx/fall.ogg')
@@ -424,15 +431,17 @@ while True:
             particle_group.update()
             particle_group.draw(screen)
 
-        'Отображаем время, прошедшее с начала игры'
-        pygame.draw.rect(screen, (255, 255, 255), (0, HEIGHT - 50, 125, HEIGHT))
+        # 'Отображаем время, прошедшее с начала игры'
+        # pygame.draw.rect(screen, (255, 255, 255), (0, HEIGHT - 50, 125, HEIGHT))
 
         if player_group:
-            screen.blit(font.render(f'{now / 1000:06.1f}s', True, (0, 0, 0)), (5, HEIGHT - 48))
+            draw_timer(screen, now)
+            # screen.blit(font.render(f'{now / 1000:06.1f}s', True, (0, 0, 0)), (5, HEIGHT - 48))
         elif not time:
             time = now
         else:
-            screen.blit(font.render(f'{time / 1000:06.1f}s', True, (0, 0, 0)), (5, HEIGHT - 48))
+            draw_timer(screen, now)
+            # screen.blit(font.render(f'{time / 1000:06.1f}s', True, (0, 0, 0)), (5, HEIGHT - 48))
 
         'Если игрок умирает, запоминаем время смерти'
         if not player_group:
@@ -447,13 +456,13 @@ while True:
 
     'Показываем титры'
     credits.end_credits(screen)
+
     rock_size = (80, 80)  # Размеры камней
     fall_time = 1500  # Задержка между камнями в миллисекундах
     rock_acceleration = 0  # Ускорение падения камней
 
     cur.execute(f"INSERT INTO columns(time) VALUES(?)", (str(timee),)).fetchall()
     con.commit()
-    con.close()
 
     end_time = pygame.time.get_ticks()
     start_time = 0

@@ -22,9 +22,9 @@ def end_credits(screen):
                 elif event.key == pygame.K_SPACE:
                     return
 
-        screen.fill((255, 255, 255))
-        text = smallfont.render("Press ESC to finish game", True, (0, 0, 0))
-        text2 = smallfont.render("Press SPACE to restart", True, (0, 0, 0))
+        screen.fill((0,0,0))
+        text = smallfont.render("Press ESC to finish game", True, (225, 177, 21))
+        text2 = smallfont.render("Press SPACE to restart", True, (225, 177, 21))
         screen.blit(text, [140, 240])
         screen.blit(text2, [140, 310])
         pygame.display.update()
@@ -39,7 +39,7 @@ def end_credits(screen):
     texts = []
 
     for i, line in enumerate(credit_list):
-        s = font.render(line, 1, (10, 10, 10))
+        s = font.render(line, 1, (225, 177, 21))
         r = s.get_rect(centerx=screen_r.centerx, y=screen_r.bottom + i * 45)
         texts.append((r, s))
 
@@ -52,7 +52,7 @@ def end_credits(screen):
             elif e.type == KEYDOWN and (e.key == pygame.K_ESCAPE or e.key == pygame.K_SPACE):
                 return
 
-        screen.fill((255, 255, 255))
+        screen.fill((0,0,0,))
 
         for r, s in texts:
             r.move_ip(0, -1)
